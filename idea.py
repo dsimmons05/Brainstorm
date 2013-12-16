@@ -28,23 +28,29 @@ class Idea:
         self.split_images('fist', os.path.join('assets', 'fist.png'), 16, 16)
         # other properties
         self.xv = 0.0
-        self.facing = 1
-        self.xspeed = 4.0
+        self.max_xv = 7.0
+        self.yv = 0.0
+        self.max_yv = 30.0
+        self.friction = 10.0
+        self.gravity = 20.0
+        self.facing = 1 # -1 = left; 1 = right
+        self.xspeed = 30.0
+        self.yspeed = 10.0
+        self.bottom = False # touching ground
         self.punching = False
 
-    def update(self, dt):
+    def update(self, dt, level):
         self.animate(dt)
         self.set_image()
-        self.rect = self.rect.move(self.xv, 0)
-        self.xv -= cmp(self.xv, 0) * 0.1
-        if abs(self.xv) < 0.2:
-            self.xv = 0.0
+        self.physics(dt, level)
+
         # punching stuff
         if self.punching:
             self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
-            self.fist_rect.y = self.y + 5
+            self.fist_rect.y = self.rect.y + 5
 
     def draw(self, display):
+        pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
         display.blit(pygame.transform.flip(\
                     self.images[self.image][self.frame],\
                     self.facing==-1, False),\
@@ -55,11 +61,37 @@ class Idea:
                         self.facing==-1, False),\
                         (self.fist_rect))
 
-    def move(self, d=None): # d = direction
+    def physics(self, dt, level):
+        ''' apply physics to the idea '''
+        self.rect = self.rect.move(self.xv, self.yv)
+        # X DIRECTION
+        self.xv -= cmp(self.xv, 0) * self.friction * dt
+        if abs(self.xv) < 0.2:
+            self.xv = 0.0
+        #self.xv = cmp(self.xv, 0) * max(cmp(self.xv, 0)*self.xv, self.max_xv)
+        if self.xv > 0:
+            #self.xv -= self.friction * dt
+            self.xv = min(self.xv, self.max_xv)
+        elif self.xv < 0:
+            #self.xv += self.friction * dt
+            self.xv = max(self.xv, -self.max_xv)
+        # Y DIRECTION
+        self.yv += self.gravity * dt
+        # LEVEL COLLISION
+        for plat in level.platforms:
+            if self.rect.colliderect(plat):
+                self.bottom = True
+                self.yv = 0.0
+                self.rect.bottom = plat.rect.top
+
+    def move(self, dt, d=None): # d = direction
         if d == 'right':
-            self.xv = self.xspeed
+            self.xv += self.xspeed * dt
         if d == 'left':
-            self.xv = -self.xspeed
+            self.xv -= self.xspeed * dt
+        if d == 'up' and self.bottom:
+            self.yv = -self.yspeed
+            self.bottom = False
 
     def punch(self):
         #! check if can punch
