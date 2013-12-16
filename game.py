@@ -28,8 +28,14 @@ class Game:
         self.font = pygame.font.Font(None, 96)
         self.score_p1 = 0
         self.score_p2 = 0
+        # sound crap
+        self.sound_jump = pygame.mixer.Sound(os.path.join('assets', 'jump.wav'))
+        self.sound_punch = pygame.mixer.Sound(os.path.join('assets', 'punch.wav'))
+        self.sound_hit = pygame.mixer.Sound(os.path.join('assets', 'hit.wav'))
+        self.sound_restart = pygame.mixer.Sound(os.path.join('assets', 'restart.wav'))
 
     def create_players(self):
+        self.sound_restart.play()
         self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
         self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
         #self.dummy = Idea('idea.png', 250, 300, 32, 64)
@@ -69,7 +75,7 @@ class Game:
             pygame.display.update()
 
     def menu(self):
-        menu_image = pygame.image.load(os.path.join('assets', 'bg0.png')).convert_alpha()
+        menu_image = pygame.image.load(os.path.join('assets', 'menu.png'))
         while True:
             self.display.blit(menu_image, (0,0))
             for event in pygame.event.get():
@@ -90,7 +96,7 @@ class Game:
         if keys[pygame.K_a]:
             self.player2.move(dt, 'left')
         if keys[pygame.K_w]:
-            self.player2.move(dt, 'up')
+            self.player2.move(dt, 'up', self.sound_jump)
         if keys[pygame.K_s]:
             self.player2.move(dt, 'down')
 
@@ -99,7 +105,7 @@ class Game:
         if keys[pygame.K_LEFT]:
             self.player.move(dt, 'left')
         if keys[pygame.K_UP]:
-            self.player.move(dt, 'up')
+            self.player.move(dt, 'up', self.sound_jump)
         if keys[pygame.K_DOWN]:
             self.player.move(dt, 'down')
 
@@ -109,9 +115,9 @@ class Game:
                     sys.exit()
                     pygame.quit()
                 if event.key == pygame.K_SPACE:
-                    self.player.punch()
+                    self.player.punch(self.sound_punch)
                 if event.key == pygame.K_LSHIFT:
-                    self.player2.punch()
+                    self.player2.punch(self.sound_punch)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_DOWN:
                     self.player.phasing = False
@@ -147,11 +153,13 @@ class Game:
                     i2.yv = new_yv2
             if i1.fist_rect.colliderect(i2.rect):
                 if i1.punching:
+                    self.sound_hit.play()
                     i2.xv = (i2.mass / 10.0) * i1.facing * i2.damage * abs(i1.xv) / 2
                     i2.yv = - (i2.mass / 10.0) * i2.damage * 5
                     i2.damage += .15
             if i2.fist_rect.colliderect(i1.rect):
                 if i2.punching:
+                    self.sound_hit.play()
                     i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
                     i1.yv = - (i1.mass / 10.0) * i1.damage * 5
                     i1.damage += .15

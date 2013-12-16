@@ -95,19 +95,21 @@ class Idea:
                 self.xv = min(abs(self.xv), abs(self.max_xv)) * self.facing
         self.bottom = touched_ground
 
-    def move(self, dt, d=None): # d = direction
+    def move(self, dt, d, sound=None): # d = direction
         if d == 'right':
             self.xv += self.xspeed * dt
         if d == 'left':
             self.xv -= self.xspeed * dt
         if d == 'up' and self.bottom:
+            sound.play()
             self.yv = -self.yspeed * 1.3
             self.bottom = False
         if d == 'down':
             self.phasing = True
 
-    def punch(self):
+    def punch(self, sound):
         #! check if can punch
+        sound.play()
         self.punching = True
         self.fist_anim_time = 0.0
 

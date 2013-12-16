@@ -4,8 +4,8 @@ x different colored player sprites
 x animated bg
 x redo sprites
 x kills/stats
-- menu (super simple)
-- sound effects
+x menu (super simple)
+x sound effects
 - music
 
 
