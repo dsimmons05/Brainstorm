@@ -1,7 +1,9 @@
 import os
 import sys
+import random
+import time
 
-import pygame, random, time
+import pygame
 
 from idea import *
 from level import *
@@ -12,41 +14,37 @@ class Game:
         self.width = w
         self.height = h
         self.display = pygame.display.set_mode((w,h))
-        #self.clock = pygame.time.Clock()
-        self.clock = time.clock()
-        self.fps = 30
-        # create ideas
-        #self.player = None
+        self.clock = pygame.time.Clock()
+        self.fps = 60
         # create level
         self.level = Level('bg0.png')
-        self.level.add_platform(Wall(200, 425, 490, 10))
-        self.level.add_platform(Wall(330, 305, 240, 10))
-        self.level.add_platform(Wall(115, 194, 270, 10))
-        self.level.add_platform(Wall(515, 185, 225, 10))
+        self.level.add_platform(Wall(200, 415, 460, 60))
+        self.level.add_platform(Wall(320, 295, 230, 10))
+        self.level.add_platform(Wall(105, 182, 260, 10))
+        self.level.add_platform(Wall(505, 185, 215, 10))
         self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
-        self.level.add_animation('bg2.png', 1, 'horizontal', 1.0)
+        self.level.add_animation('bg2.png', 1, 'horizontal', 5.0)
 
     def create_players(self):
-        self.player = Idea('idea.png', 300, 300, 32, 32)
-        self.player2 = Idea('idea.png', 350, 300, 32, 32)
-        self.dummy = Idea('idea.png', 250, 300, 32, 32)
+        self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
+        self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
+        #self.dummy = Idea('idea.png', 250, 300, 32, 64)
         self.ideas = []
         self.dead_idea = []
         self.ideas.append(self.player)
         self.ideas.append(self.player2)
-        self.ideas.append(self.dummy)
+        #self.ideas.append(self.dummy)
         self.num_ideas = len(self.ideas)
 
     def run(self):
-        self.create_players()
+        self.menu()
         while True:
-            #dt = self.clock.tick(self.fps) / 1000.0
-            dt = self.clock / 15
+            dt = self.clock.tick(self.fps) / 1000.0
             # check events
             self.events(dt)
             # draw and update
             self.level.draw(self.display)
-            #self.level.animate(dt)
+            self.level.animate(dt)
             self.collisions()
             for idea in self.ideas:
                 idea.update(dt, self.level)
@@ -58,6 +56,20 @@ class Game:
             if len(self.dead_idea) >= self.num_ideas - 1:
                 self.create_players()
             # update the damn screen
+            pygame.display.update()
+
+    def menu(self):
+        menu_image = pygame.image.load(os.path.join('assets', 'bg0.png')).convert_alpha()
+        while True:
+            self.display.blit(menu_image, (0,0))
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        sys.exit()
+                        pygame.quit()
+                    if event.key == pygame.K_SPACE:
+                        self.create_players()
+                        return
             pygame.display.update()
 
 

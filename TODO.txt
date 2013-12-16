@@ -1,9 +1,9 @@
 x restart game
 - different colored player sprites
     - transparency?
-- transparency when damaged ?
+-s transparency when damaged ?
     ~ damage counter next to players
-- animated bg
+x animated bg
 - music
 - sound effects
 - menu (super simple)

@@ -16,16 +16,16 @@ class Idea:
         self.split_images('idea', os.path.join('assets', filename), w, h)
         self.image = 'idle' # current image
         self.frame = 0
-        self.image_speeds = {'idle': 1.0, 'run': 0.3, 'jump': 1.0}
+        self.image_speeds = {'idle': 1.0, 'run': 0.1, 'jump': 1.0}
         self.anim_time = 0.0 # keeps track of time spent on current frame
         # set up fist image and animation properties
         self.fist_images = []
-        self.fist_rect = pygame.Rect(x, y, 16, 16)
-        self.fist_frames = 4 # number of frames in animation
+        self.fist_rect = pygame.Rect(x, y, 64, 64)
+        self.fist_frames = 3 # number of frames in animation
         self.fist_frame = 0 # current punching frame
         self.fist_speed = 0.1
         self.fist_anim_time = 0.0
-        self.split_images('fist', os.path.join('assets', 'fist.png'), 16, 16)
+        self.split_images('fist', os.path.join('assets', 'fist.png'), 64, 64)
         # other properties
         self.mass = 10.0
         self.xv = 0.0
@@ -51,11 +51,11 @@ class Idea:
 
             # punching stuff
             if self.punching:
-                self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
+                self.fist_rect.x = self.facing * 60 + self.rect.center[0] - max(self.facing, 0) * 64
                 self.fist_rect.y = self.rect.y + 5
 
     def draw(self, display):
-        pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
+        #pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
         display.blit(pygame.transform.flip(\
                     self.images[self.image][self.frame],\
                     self.facing==-1, False),\
@@ -159,9 +159,8 @@ class Idea:
                 self.images[anim] = imgs
                 self.image_frames[anim] = len(imgs)-1
         elif obj == 'fist':
-            # set up idle animation
             for i in range(self.fist_frames):
                 frame = img.subsurface(\
-                            (i*16, 0),\
-                            (16, 16))
+                            (i*64, 0),\
+                            (64, 64))
                 self.fist_images.append(frame)

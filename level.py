@@ -12,7 +12,7 @@ class Wall:
 class Level:
     def __init__(self, filename):
         self.platforms = []
-        self.image = pygame.image.load(os.path.join('assets', filename)).convert_alpha()
+        self.image = pygame.image.load(os.path.join('assets', filename))
         self.anims = {}
 
     def add_platform(self, platform):
@@ -36,9 +36,10 @@ class Level:
 
     def animate(self, dt):
         for a in self.anims:
-            if self.anims[a]['pos'] <= self.anims[a]['end'] or self.anims[a]['pos'] > 0:
-                self.anims[a]['dir'] *= -1
-            self.anims[a]['pos'] += self.anims[a]['speed'] * dt * self.anims[a]['dir']
+            if self.anims[a]['mode'] == 'vertical':
+                if self.anims[a]['pos'] <= self.anims[a]['end'] or self.anims[a]['pos'] > 0:
+                    self.anims[a]['dir'] *= -1
+                self.anims[a]['pos'] += self.anims[a]['speed'] * dt * self.anims[a]['dir']
 
     def draw(self, display):
         # draw background images
@@ -50,5 +51,5 @@ class Level:
                 display.blit(self.anims[i]['image'], (self.anims[i]['pos'], 0))
 
         # draw platforms
-        for plat in self.platforms:
-            plat.draw(display)
+        #for plat in self.platforms:
+        #    plat.draw(display)
