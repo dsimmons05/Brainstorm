@@ -27,6 +27,8 @@ class Level:
                                 'end': 0,
                                 'speed': speed,
                                 'dir': -1}
+        '''if filename == 'bg2.png':
+            self.anims[z]['image'] = pygame.transform.rotate(self.anims[z]['image'], -1.0)'''
         if mode == 'horizontal':
             self.anims[z]['end'] = - self.anims[z]['image'].get_width() + 800.0
         if mode == 'vertical':

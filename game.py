@@ -1,7 +1,7 @@
 import os
 import sys
 
-import pygame, random
+import pygame, random, time
 
 from idea import *
 from level import *
@@ -12,21 +12,24 @@ class Game:
         self.width = w
         self.height = h
         self.display = pygame.display.set_mode((w,h))
-        self.clock = pygame.time.Clock()
-        self.fps = 60
+        #self.clock = pygame.time.Clock()
+        self.clock = time.clock()
+        self.fps = 30
         # create ideas
         #self.player = None
         # create level
         self.level = Level('bg0.png')
-        self.level.add_platform(Wall(0, 400, 500, 10))
-        self.level.add_platform(Wall(150, 450, 500, 10))
+        self.level.add_platform(Wall(200, 425, 490, 10))
+        self.level.add_platform(Wall(330, 305, 240, 10))
+        self.level.add_platform(Wall(115, 194, 270, 10))
+        self.level.add_platform(Wall(515, 185, 225, 10))
         self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
         self.level.add_animation('bg2.png', 1, 'horizontal', 1.0)
 
     def create_players(self):
-        self.player = Idea('idea.png', 0, 300, 32, 32)
-        self.player2 = Idea('idea.png', 200, 300, 32, 32)
-        self.dummy = Idea('idea.png', 120, 300, 32, 32)
+        self.player = Idea('idea.png', 300, 300, 32, 32)
+        self.player2 = Idea('idea.png', 350, 300, 32, 32)
+        self.dummy = Idea('idea.png', 250, 300, 32, 32)
         self.ideas = []
         self.dead_idea = []
         self.ideas.append(self.player)
@@ -37,12 +40,13 @@ class Game:
     def run(self):
         self.create_players()
         while True:
-            dt = self.clock.tick(self.fps) / 1000.0
+            #dt = self.clock.tick(self.fps) / 1000.0
+            dt = self.clock / 15
             # check events
             self.events(dt)
             # draw and update
             self.level.draw(self.display)
-            self.level.animate(dt)
+            #self.level.animate(dt)
             self.collisions()
             for idea in self.ideas:
                 idea.update(dt, self.level)
@@ -84,6 +88,8 @@ class Game:
                     pygame.quit()
                 if event.key == pygame.K_SPACE:
                     self.player.punch()
+                if event.key == pygame.K_LSHIFT:
+                    self.player2.punch()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_DOWN:
                     self.player.phasing = False

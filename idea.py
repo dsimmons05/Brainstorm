@@ -65,11 +65,13 @@ class Idea:
                         self.fist_images[self.fist_frame],\
                         self.facing==-1, False),\
                         (self.fist_rect))
-        pygame.draw.rect(display, (0,0,255), (self.fist_rect))
+        #pygame.draw.rect(display, (0,0,255), (self.fist_rect))
 
     def physics(self, dt, level):
         ''' apply physics to the idea '''
         self.rect = self.rect.move(self.xv, self.yv)
+        self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
+        self.fist_rect.y = self.rect.y + 5
         # X DIRECTION
         self.xv -= cmp(self.xv, 0) * self.friction * dt
         if abs(self.xv) < 0.2:
@@ -86,7 +88,7 @@ class Idea:
         touched_ground = False
         for plat in level.platforms:
             if self.rect.colliderect(plat) and abs(self.rect.bottom - plat.rect.top) < 16\
-            and self.yv >= 0.0 and not self.phasing:
+            and self.yv >= 0.0 and (not self.phasing or not self.rect.bottom < 400):
                 self.yv = 0.0
                 self.rect.bottom = plat.rect.top
                 touched_ground = True
