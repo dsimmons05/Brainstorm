@@ -40,16 +40,19 @@ class Idea:
         self.bottom = False # touching ground
         self.phasing = False # phasing through a platform
         self.punching = False
+        self.damage = 1.0
+        self.dead = False
 
     def update(self, dt, level):
-        self.animate(dt)
-        self.set_image()
-        self.physics(dt, level)
+        if not self.dead:
+            self.animate(dt)
+            self.set_image()
+            self.physics(dt, level)
 
-        # punching stuff
-        if self.punching:
-            self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
-            self.fist_rect.y = self.rect.y + 5
+            # punching stuff
+            if self.punching:
+                self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
+                self.fist_rect.y = self.rect.y + 5
 
     def draw(self, display):
         pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
@@ -71,12 +74,11 @@ class Idea:
         if abs(self.xv) < 0.2:
             self.xv = 0.0
         #self.xv = cmp(self.xv, 0) * max(cmp(self.xv, 0)*self.xv, self.max_xv)
-        if self.xv > 0:
+        '''if self.xv > 0:
             #self.xv -= self.friction * dt
             self.xv = min(self.xv, self.max_xv)
         elif self.xv < 0:
-            #self.xv += self.friction * dt
-            self.xv = max(self.xv, -self.max_xv)
+            self.xv = max(self.xv, -self.max_xv)'''
         # Y DIRECTION
         self.yv += self.gravity * dt
         # LEVEL COLLISION
@@ -87,6 +89,7 @@ class Idea:
                 self.yv = 0.0
                 self.rect.bottom = plat.rect.top
                 touched_ground = True
+                self.xv = min(abs(self.xv), abs(self.max_xv)) * self.facing
         self.bottom = touched_ground
 
     def move(self, dt, d=None): # d = direction
@@ -95,7 +98,7 @@ class Idea:
         if d == 'left':
             self.xv -= self.xspeed * dt
         if d == 'up' and self.bottom:
-            self.yv = -self.yspeed
+            self.yv = -self.yspeed * 1.3
             self.bottom = False
         if d == 'down':
             self.phasing = True

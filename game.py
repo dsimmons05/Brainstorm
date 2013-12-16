@@ -1,7 +1,7 @@
 import os
 import sys
 
-import pygame
+import pygame, random
 
 from idea import *
 from level import *
@@ -13,24 +13,28 @@ class Game:
         self.height = h
         self.display = pygame.display.set_mode((w,h))
         self.clock = pygame.time.Clock()
-        self.fps = 30
+        self.fps = 60
         # create ideas
-        self.player = Idea('idea.png', 0, 300, 32, 32)
-        self.player2 = Idea('idea.png', 200, 300, 32, 32)
-        self.dummy = Idea('idea.png', 120, 300, 32, 32)
-        self.ideas = []
-        self.ideas.append(self.player)
-        self.ideas.append(self.player2)
-        self.ideas.append(self.dummy)
-        self.num_ideas = len(self.ideas)
+        #self.player = None
         # create level
         self.level = Level()
         self.level.add_platform(Wall(0, 400, 500, 10))
         self.level.add_platform(Wall(150, 450, 500, 10))
+    def create_players(self):
+        self.player = Idea('idea.png', 0, 300, 32, 32)
+        self.player2 = Idea('idea.png', 200, 300, 32, 32)
+        self.dummy = Idea('idea.png', 120, 300, 32, 32)
+        self.ideas = []
+        self.dead_idea = []
+        self.ideas.append(self.player)
+        self.ideas.append(self.player2)
+        self.ideas.append(self.dummy)
+        self.num_ideas = len(self.ideas)
 
     def run(self):
         #! MAKE LEVEL CLASS
         level = pygame.image.load(os.path.join('assets', 'bg_pixelated.png'))
+        self.create_players()
         while True:
             dt = self.clock.tick(self.fps) / 1000.0
             # check events
@@ -42,8 +46,15 @@ class Game:
             for idea in self.ideas:
                 idea.update(dt, self.level)
                 idea.draw(self.display)
+                if idea.rect.x < -200 or idea.rect.x > 1000 or idea.rect.y > 1000:
+                    if not idea.dead:
+                        idea.dead = True
+                        self.dead_idea.append(idea)
+            if len(self.dead_idea) >= self.num_ideas - 1:
+                self.create_players()
             # update the damn screen
             pygame.display.update()
+
 
     def events(self, dt):
         keys = pygame.key.get_pressed()
@@ -102,3 +113,31 @@ class Game:
                     new_yv2 = (i2.yv * (i2.mass - i1.mass) + 2 * i2.mass * i1.yv) / (i2.mass + i1.mass)
                     i1.yv = new_yv1
                     i2.yv = new_yv2
+            if i1.fist_rect.colliderect(i2.rect):
+                if i1.punching:
+                    i2.xv = (i2.mass / 10.0) * i1.facing * i2.damage * abs(i1.xv) / 2
+                    i2.yv = - (i2.mass / 10.0) * i2.damage * 5
+                    i2.damage += .15
+            if i2.fist_rect.colliderect(i1.rect):
+                if i2.punching:
+                    i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
+                    i1.yv = - (i1.mass / 10.0) * i1.damage * 5
+                    i1.damage += .15
+    '''class Ai(Idea):
+        def __init__(self):
+            Idea.__init__(self)
+        def choice(self, enemies):
+            for enemy in enemies:
+                if abs(self.rect.x - enemy.rect.x) < 200:
+                    choice = random.choice(['chase', 'chase', 'run'])
+                    if choice == 'chase':
+                        self.chase()
+                    if choice == 'run':
+                        self.run()
+        def chase(self, target):
+            pass
+        def run(self, chaser):
+            pass
+        def random(self):
+            pass'''
+
