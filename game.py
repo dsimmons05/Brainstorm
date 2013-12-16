@@ -17,9 +17,12 @@ class Game:
         # create ideas
         #self.player = None
         # create level
-        self.level = Level()
+        self.level = Level('bg0.png')
         self.level.add_platform(Wall(0, 400, 500, 10))
         self.level.add_platform(Wall(150, 450, 500, 10))
+        self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
+        self.level.add_animation('bg2.png', 1, 'horizontal', 1.0)
+
     def create_players(self):
         self.player = Idea('idea.png', 0, 300, 32, 32)
         self.player2 = Idea('idea.png', 200, 300, 32, 32)
@@ -32,16 +35,14 @@ class Game:
         self.num_ideas = len(self.ideas)
 
     def run(self):
-        #! MAKE LEVEL CLASS
-        level = pygame.image.load(os.path.join('assets', 'bg_pixelated.png'))
         self.create_players()
         while True:
             dt = self.clock.tick(self.fps) / 1000.0
             # check events
             self.events(dt)
             # draw and update
-            self.display.blit(level, (0,0))
             self.level.draw(self.display)
+            self.level.animate(dt)
             self.collisions()
             for idea in self.ideas:
                 idea.update(dt, self.level)

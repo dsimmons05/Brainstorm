@@ -65,6 +65,7 @@ class Idea:
                         self.fist_images[self.fist_frame],\
                         self.facing==-1, False),\
                         (self.fist_rect))
+        pygame.draw.rect(display, (0,0,255), (self.fist_rect))
 
     def physics(self, dt, level):
         ''' apply physics to the idea '''
