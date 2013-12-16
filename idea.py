@@ -27,6 +27,7 @@ class Idea:
         self.fist_anim_time = 0.0
         self.split_images('fist', os.path.join('assets', 'fist.png'), 16, 16)
         # other properties
+        self.mass = 10.0
         self.xv = 0.0
         self.max_xv = 7.0
         self.yv = 0.0
@@ -37,6 +38,7 @@ class Idea:
         self.xspeed = 30.0
         self.yspeed = 10.0
         self.bottom = False # touching ground
+        self.phasing = False # phasing through a platform
         self.punching = False
 
     def update(self, dt, level):
@@ -78,11 +80,14 @@ class Idea:
         # Y DIRECTION
         self.yv += self.gravity * dt
         # LEVEL COLLISION
+        touched_ground = False
         for plat in level.platforms:
-            if self.rect.colliderect(plat):
-                self.bottom = True
+            if self.rect.colliderect(plat) and abs(self.rect.bottom - plat.rect.top) < 16\
+            and self.yv >= 0.0 and not self.phasing:
                 self.yv = 0.0
                 self.rect.bottom = plat.rect.top
+                touched_ground = True
+        self.bottom = touched_ground
 
     def move(self, dt, d=None): # d = direction
         if d == 'right':
@@ -92,6 +97,8 @@ class Idea:
         if d == 'up' and self.bottom:
             self.yv = -self.yspeed
             self.bottom = False
+        if d == 'down':
+            self.phasing = True
 
     def punch(self):
         #! check if can punch
