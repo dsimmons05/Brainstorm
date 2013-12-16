@@ -33,6 +33,12 @@ class Game:
         self.sound_punch = pygame.mixer.Sound(os.path.join('assets', 'punch.wav'))
         self.sound_hit = pygame.mixer.Sound(os.path.join('assets', 'hit.wav'))
         self.sound_restart = pygame.mixer.Sound(os.path.join('assets', 'restart.wav'))
+        self.sound_jump.set_volume(0.5)
+        self.sound_punch.set_volume(0.5)
+        self.sound_hit.set_volume(0.5)
+        self.sound_restart.set_volume(0.5)
+        pygame.mixer.music.load(os.path.join('assets', 'brainblast.wav'))
+        pygame.mixer.music.play(-1)
 
     def create_players(self):
         self.sound_restart.play()
