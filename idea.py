@@ -23,7 +23,7 @@ class Idea:
         self.fist_rect = pygame.Rect(x, y, 64, 64)
         self.fist_frames = 3 # number of frames in animation
         self.fist_frame = 0 # current punching frame
-        self.fist_speed = 0.1
+        self.fist_speed = 0.05
         self.fist_anim_time = 0.0
         self.split_images('fist', os.path.join('assets', 'fist.png'), 64, 64)
         # other properties

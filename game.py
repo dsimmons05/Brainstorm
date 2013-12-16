@@ -24,6 +24,10 @@ class Game:
         self.level.add_platform(Wall(505, 185, 215, 10))
         self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
         self.level.add_animation('bg2.png', 1, 'horizontal', 5.0)
+        # score crap
+        self.font = pygame.font.Font(None, 96)
+        self.score_p1 = 0
+        self.score_p2 = 0
 
     def create_players(self):
         self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
@@ -53,6 +57,12 @@ class Game:
                     if not idea.dead:
                         idea.dead = True
                         self.dead_idea.append(idea)
+                        if idea == self.player:
+                            self.score_p2 += 1
+                        elif idea == self.player2:
+                            self.score_p1 += 1
+            self.draw_score()
+            # reset game when one player left
             if len(self.dead_idea) >= self.num_ideas - 1:
                 self.create_players()
             # update the damn screen
@@ -108,6 +118,9 @@ class Game:
                 if event.key == pygame.K_s:
                     self.player2.phasing = False
 
+    def draw_score(self):
+        self.display.blit(self.font.render(str(self.score_p1), 1, (252, 252, 97)), (310, 500))
+        self.display.blit(self.font.render(str(self.score_p2), 1, (119, 252, 97)), (460, 500))
 
     def collisions(self):
         check_ideas = []

@@ -1,25 +1,18 @@
 x restart game
-- different colored player sprites
-    - transparency?
--s transparency when damaged ?
-    ~ damage counter next to players
+x different colored player sprites
+- transparency/glow with damage
 x animated bg
-- music
-- sound effects
+x redo sprites
+x kills/stats
 - menu (super simple)
-- redo sprites
-- multiplayer options (1p or 2p)
+- sound effects
+- music
+
+
+
+
 - AI?!
-
-
-
-
-
-- kills/stats
-
-
-
-
+- multiplayer options (1p or 2p)
 
 
 
