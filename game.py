@@ -16,9 +16,11 @@ class Game:
         self.fps = 30
         # create ideas
         self.player = Idea('idea.png', 0, 300, 32, 32)
+        self.player2 = Idea('idea.png', 200, 300, 32, 32)
         self.dummy = Idea('idea.png', 120, 300, 32, 32)
         self.ideas = []
         self.ideas.append(self.player)
+        self.ideas.append(self.player2)
         self.ideas.append(self.dummy)
         self.num_ideas = len(self.ideas)
         # create level
@@ -45,6 +47,15 @@ class Game:
 
     def events(self, dt):
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_d]:
+            self.player2.move(dt, 'right')
+        if keys[pygame.K_a]:
+            self.player2.move(dt, 'left')
+        if keys[pygame.K_w]:
+            self.player2.move(dt, 'up')
+        if keys[pygame.K_s]:
+            self.player2.move(dt, 'down')
+
         if keys[pygame.K_RIGHT]:
             self.player.move(dt, 'right')
         if keys[pygame.K_LEFT]:
@@ -64,6 +75,8 @@ class Game:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_DOWN:
                     self.player.phasing = False
+                if event.key == pygame.K_s:
+                    self.player2.phasing = False
 
 
     def collisions(self):
