@@ -86,7 +86,7 @@ class Game:
                 check_ideas.append([i, self.ideas[e]])
         for i1, i2 in check_ideas:
             if i1.rect.colliderect(i2.rect):
-                if abs(i1.xv) > 1:
+                if abs(i1.xv) > 1 or abs(i2.xv) > 1:
                     new_xv1 = (i1.xv * (i1.mass - i2.mass) + 2 * i1.mass * i2.xv) / (i1.mass + i2.mass)
                     new_xv2 = (i2.xv * (i2.mass - i1.mass) + 2 * i2.mass * i1.xv) / (i2.mass + i1.mass)
                     i1.xv = new_xv1
