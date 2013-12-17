@@ -10,7 +10,7 @@ class Idea:
         self.w = w
         self.h = h
         # set up idea image and animation properties
-        self.rect = pygame.Rect((x, y, w, h))
+        self.rect = pygame.Rect((x, y, w - 18, h))
         self.images = {'idle': [0,1], 'run': [2,5], 'jump': [6,7]}
         self.image_frames = {} # holds number of frames for each animation
         self.split_images('idea', os.path.join('assets', filename), w, h)
@@ -20,7 +20,7 @@ class Idea:
         self.anim_time = 0.0 # keeps track of time spent on current frame
         # set up fist image and animation properties
         self.fist_images = []
-        self.fist_rect = pygame.Rect(x, y, 64, 64)
+        self.fist_rect = pygame.Rect(x, y, 40, 64)
         self.fist_frames = 3 # number of frames in animation
         self.fist_frame = 0 # current punching frame
         self.fist_speed = 0.05
@@ -44,6 +44,7 @@ class Idea:
         self.dead = False
 
     def update(self, dt, level):
+        print dt
         if not self.dead:
             self.animate(dt)
             self.set_image()
@@ -51,7 +52,7 @@ class Idea:
 
             # punching stuff
             if self.punching:
-                self.fist_rect.x = self.facing * 60 + self.rect.center[0] - max(self.facing, 0) * 64
+                self.fist_rect.x = self.facing * 60 + self.rect.center[0] - max(self.facing, 0) * 40
                 self.fist_rect.y = self.rect.y + 5
 
     def draw(self, display):
@@ -59,18 +60,18 @@ class Idea:
         display.blit(pygame.transform.flip(\
                     self.images[self.image][self.frame],\
                     self.facing==-1, False),\
-                    (self.rect))
+                    (self.rect.x - 9, self.rect.y))
         if self.punching:
             display.blit(pygame.transform.flip(\
                         self.fist_images[self.fist_frame],\
                         self.facing==-1, False),\
-                        (self.fist_rect))
-        #pygame.draw.rect(display, (0,0,255), (self.fist_rect))
+                        (self.fist_rect.x - 10, self.fist_rect.y))
+        #pygame.draw.rect(display, (0,0,255), (self.fist_rect), 1)
 
     def physics(self, dt, level):
         ''' apply physics to the idea '''
         self.rect = self.rect.move(self.xv, self.yv)
-        self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 16
+        self.fist_rect.x = self.facing * 30 + self.rect.center[0] - max(self.facing, 0) * 40
         self.fist_rect.y = self.rect.y + 5
         # X DIRECTION
         self.xv -= cmp(self.xv, 0) * self.friction * dt
