@@ -44,7 +44,6 @@ class Idea:
         self.dead = False
 
     def update(self, dt, level):
-        print dt
         if not self.dead:
             self.animate(dt)
             self.set_image()

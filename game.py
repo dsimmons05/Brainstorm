@@ -7,6 +7,8 @@ import pygame
 
 from idea import *
 from level import *
+from triangle import *
+from ai import *
 
 class Game:
     def __init__(self, w, h):
@@ -44,24 +46,27 @@ class Game:
         self.sound_restart.play()
         self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
         self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
-        #self.dummy = Idea('idea.png', 250, 300, 32, 64)
+        self.dummy = Ai('idea_yellow.png', 250, 100, 64, 64)
         self.ideas = []
         self.dead_idea = []
         self.ideas.append(self.player)
         self.ideas.append(self.player2)
-        #self.ideas.append(self.dummy)
+        self.ideas.append(self.dummy)
         self.num_ideas = len(self.ideas)
 
     def run(self):
         self.menu()
         while True:
-            dt = self.clock.tick(self.fps) / 1000.0
+            #dt = self.clock.tick(self.fps) / 1000.0
+            dt = .037
             # check events
             self.events(dt)
             # draw and update
             self.level.draw(self.display)
             self.level.animate(dt)
             self.collisions()
+            self.draw_arrows()
+            self.dummy.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
             for idea in self.ideas:
                 idea.update(dt, self.level)
                 idea.draw(self.display)
@@ -169,21 +174,27 @@ class Game:
                     i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
                     i1.yv = - (i1.mass / 10.0) * i1.damage * 5
                     i1.damage += .15
-    '''class Ai(Idea):
-        def __init__(self):
-            Idea.__init__(self)
-        def choice(self, enemies):
-            for enemy in enemies:
-                if abs(self.rect.x - enemy.rect.x) < 200:
-                    choice = random.choice(['chase', 'chase', 'run'])
-                    if choice == 'chase':
-                        self.chase()
-                    if choice == 'run':
-                        self.run()
-        def chase(self, target):
-            pass
-        def run(self, chaser):
-            pass
-        def random(self):
-            pass'''
 
+    def draw_arrows(self):
+        for idea in self.ideas:
+            if idea.rect.x > self.width:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (self.width - 20, idea.rect.y), 10, 0, 90)
+                arrow.draw()
+            if idea.rect.x < 0:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (20, idea.rect.y), 10, 0, 270)
+                arrow.draw()
+            if idea.rect.y < 0:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (idea.rect.x, 20), 10, 0, 0)
+                arrow.draw()
