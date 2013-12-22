@@ -7,6 +7,8 @@ import pygame
 
 from idea import *
 from level import *
+from triangle import *
+from ai import *
 
 class Game:
     def __init__(self, w, h):
@@ -18,7 +20,7 @@ class Game:
         self.fps = 60
         # create level
         self.level = Level('bg0.png')
-        self.level.add_platform(Wall(200, 415, 460, 60))
+        self.level.add_platform(Wall(200, 415, 460, 200))
         self.level.add_platform(Wall(320, 295, 230, 10))
         self.level.add_platform(Wall(105, 182, 260, 10))
         self.level.add_platform(Wall(505, 185, 215, 10))
@@ -44,24 +46,27 @@ class Game:
         self.sound_restart.play()
         self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
         self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
-        #self.dummy = Idea('idea.png', 250, 300, 32, 64)
+        self.dummy = Ai('idea_yellow.png', 250, 100, 64, 64)
         self.ideas = []
         self.dead_idea = []
         self.ideas.append(self.player)
         self.ideas.append(self.player2)
-        #self.ideas.append(self.dummy)
+        self.ideas.append(self.dummy)
         self.num_ideas = len(self.ideas)
 
     def run(self):
         self.menu()
         while True:
-            dt = self.clock.tick(self.fps) / 1000.0
+            #dt = self.clock.tick(self.fps) / 1000.0
+            dt = .037
             # check events
             self.events(dt)
             # draw and update
             self.level.draw(self.display)
             self.level.animate(dt)
             self.collisions()
+            self.draw_arrows()
+            self.dummy.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
             for idea in self.ideas:
                 idea.update(dt, self.level)
                 idea.draw(self.display)
@@ -141,11 +146,20 @@ class Game:
                 check_ideas.append([i, self.ideas[e]])
         for i1, i2 in check_ideas:
             if i1.rect.colliderect(i2.rect):
-                if abs(i1.xv) > 1 or abs(i2.xv) > 1:
-                    new_xv1 = (i1.xv * (i1.mass - i2.mass) + 2 * i1.mass * i2.xv) / (i1.mass + i2.mass)
-                    new_xv2 = (i2.xv * (i2.mass - i1.mass) + 2 * i2.mass * i1.xv) / (i2.mass + i1.mass)
-                    i1.xv = new_xv1
-                    i2.xv = new_xv2
+                ## might take out this requirment
+                ##if abs(i1.xv) > 1.5 or abs(i2.xv) > 1.5:
+                new_xv1 = (i1.xv * (i1.mass - i2.mass) + 2 * i1.mass * i2.xv) / (i1.mass + i2.mass)
+                new_xv2 = (i2.xv * (i2.mass - i1.mass) + 2 * i2.mass * i1.xv) / (i2.mass + i1.mass)
+                i1.xv = new_xv1
+                i2.xv = new_xv2
+                ## Potentials fixes
+                if abs(i1.rect.x - i2.rect.x) < 46:
+                        i1.rect.x -= 10
+                if abs(i1.rect.y - i2.rect.y) > 64:
+                    if i1.rect.y > i2.rect.y:
+                        i1.rect.x -= 10
+                    else:
+                        i2.rect.x += 10
                 if i1.bottom:
                     if not i2.bottom:
                         i2.yv = -i2.mass
@@ -162,28 +176,38 @@ class Game:
                     self.sound_hit.play()
                     i2.xv = (i2.mass / 10.0) * i1.facing * i2.damage * abs(i1.xv) / 2
                     i2.yv = - (i2.mass / 10.0) * i2.damage * 5
+                    ## make you move back after you punch
+                    i1.xv = (i1.mass / 10.0) * (-i1.facing) * abs(i1.xv) / 2
                     i2.damage += .15
             if i2.fist_rect.colliderect(i1.rect):
                 if i2.punching:
                     self.sound_hit.play()
                     i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
                     i1.yv = - (i1.mass / 10.0) * i1.damage * 5
+                    ## make you move back after you punch
+                    i2.xv = (i2.mass / 10.0) * (-i2.facing) * abs(i2.xv) / 2
                     i1.damage += .15
-    '''class Ai(Idea):
-        def __init__(self):
-            Idea.__init__(self)
-        def choice(self, enemies):
-            for enemy in enemies:
-                if abs(self.rect.x - enemy.rect.x) < 200:
-                    choice = random.choice(['chase', 'chase', 'run'])
-                    if choice == 'chase':
-                        self.chase()
-                    if choice == 'run':
-                        self.run()
-        def chase(self, target):
-            pass
-        def run(self, chaser):
-            pass
-        def random(self):
-            pass'''
 
+    def draw_arrows(self):
+        for idea in self.ideas:
+            if idea.rect.x > self.width:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (self.width - 20, idea.rect.y), 10, 0, 90)
+                arrow.draw()
+            if idea.rect.x < 0:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (20, idea.rect.y), 10, 0, 270)
+                arrow.draw()
+            if idea.rect.y < 0:
+                if idea == self.player:
+                    color = (252, 252, 97)
+                else:
+                    color = (119, 252, 97)
+                arrow = Triangle(self.display, color, (idea.rect.x, 20), 10, 0, 0)
+                arrow.draw()

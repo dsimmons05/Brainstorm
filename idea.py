@@ -55,7 +55,7 @@ class Idea:
                 self.fist_rect.y = self.rect.y + 5
 
     def draw(self, display):
-        #pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
+        pygame.draw.rect(display, (0, 255, 255), self.rect, 1)
         display.blit(pygame.transform.flip(\
                     self.images[self.image][self.frame],\
                     self.facing==-1, False),\
@@ -65,7 +65,7 @@ class Idea:
                         self.fist_images[self.fist_frame],\
                         self.facing==-1, False),\
                         (self.fist_rect.x - 10, self.fist_rect.y))
-        #pygame.draw.rect(display, (0,0,255), (self.fist_rect), 1)
+        pygame.draw.rect(display, (0,0,255), (self.fist_rect), 1)
 
     def physics(self, dt, level):
         ''' apply physics to the idea '''
