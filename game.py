@@ -11,13 +11,14 @@ from triangle import *
 from ai import *
 
 class Game:
-    def __init__(self, w, h):
+    def __init__(self, w, h, fps_const):
         pygame.init()
         self.width = w
         self.height = h
         self.display = pygame.display.set_mode((w,h))
         self.clock = pygame.time.Clock()
         self.fps = 60
+        self.fps_const = fps_const
         # create level
         self.level = Level('bg0.png')
         self.level.add_platform(Wall(200, 415, 460, 200))
@@ -57,8 +58,7 @@ class Game:
     def run(self):
         self.menu()
         while True:
-            #dt = self.clock.tick(self.fps) / 1000.0
-            dt = .037
+            dt = self.clock.tick(self.fps) / self.fps_const
             # check events
             self.events(dt)
             # draw and update
