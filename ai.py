@@ -22,8 +22,8 @@ class Ai(Idea):
                     self.chase(enemy)
                 if choice == 'run':
                     self.run(enemy)
-            '''else:
-                self.random()'''
+            else:
+                self.random()
     def chase(self, target):
         if self.rect.x - target.rect.x > 0: 
             self.move(self.dt, 'left', sound=None)

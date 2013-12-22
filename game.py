@@ -20,7 +20,7 @@ class Game:
         self.fps = 60
         # create level
         self.level = Level('bg0.png')
-        self.level.add_platform(Wall(200, 415, 460, 60))
+        self.level.add_platform(Wall(200, 415, 460, 200))
         self.level.add_platform(Wall(320, 295, 230, 10))
         self.level.add_platform(Wall(105, 182, 260, 10))
         self.level.add_platform(Wall(505, 185, 215, 10))
@@ -146,11 +146,20 @@ class Game:
                 check_ideas.append([i, self.ideas[e]])
         for i1, i2 in check_ideas:
             if i1.rect.colliderect(i2.rect):
-                if abs(i1.xv) > 1 or abs(i2.xv) > 1:
-                    new_xv1 = (i1.xv * (i1.mass - i2.mass) + 2 * i1.mass * i2.xv) / (i1.mass + i2.mass)
-                    new_xv2 = (i2.xv * (i2.mass - i1.mass) + 2 * i2.mass * i1.xv) / (i2.mass + i1.mass)
-                    i1.xv = new_xv1
-                    i2.xv = new_xv2
+                ## might take out this requirment
+                ##if abs(i1.xv) > 1.5 or abs(i2.xv) > 1.5:
+                new_xv1 = (i1.xv * (i1.mass - i2.mass) + 2 * i1.mass * i2.xv) / (i1.mass + i2.mass)
+                new_xv2 = (i2.xv * (i2.mass - i1.mass) + 2 * i2.mass * i1.xv) / (i2.mass + i1.mass)
+                i1.xv = new_xv1
+                i2.xv = new_xv2
+                ## Potentials fixes
+                if abs(i1.rect.x - i2.rect.x) < 46:
+                        i1.rect.x -= 10
+                if abs(i1.rect.y - i2.rect.y) > 64:
+                    if i1.rect.y > i2.rect.y:
+                        i1.rect.x -= 10
+                    else:
+                        i2.rect.x += 10
                 if i1.bottom:
                     if not i2.bottom:
                         i2.yv = -i2.mass
@@ -167,12 +176,16 @@ class Game:
                     self.sound_hit.play()
                     i2.xv = (i2.mass / 10.0) * i1.facing * i2.damage * abs(i1.xv) / 2
                     i2.yv = - (i2.mass / 10.0) * i2.damage * 5
+                    ## make you move back after you punch
+                    i1.xv = (i1.mass / 10.0) * (-i1.facing) * abs(i1.xv) / 2
                     i2.damage += .15
             if i2.fist_rect.colliderect(i1.rect):
                 if i2.punching:
                     self.sound_hit.play()
                     i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
                     i1.yv = - (i1.mass / 10.0) * i1.damage * 5
+                    ## make you move back after you punch
+                    i2.xv = (i2.mass / 10.0) * (-i2.facing) * abs(i2.xv) / 2
                     i1.damage += .15
 
     def draw_arrows(self):
