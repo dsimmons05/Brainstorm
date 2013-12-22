@@ -5,6 +5,7 @@ import time
 
 import pygame
 
+from menu import *
 from idea import *
 from level import *
 from triangle import *
@@ -19,6 +20,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.fps_const = fps_const
+        self.gameover = True
         # create level
         self.level = Level('bg0.png')
         self.level.add_platform(Wall(200, 415, 460, 200))
@@ -27,10 +29,8 @@ class Game:
         self.level.add_platform(Wall(505, 185, 215, 10))
         self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
         self.level.add_animation('bg2.png', 1, 'horizontal', 5.0)
-        # score crap
+        # setup font for scores
         self.font = pygame.font.Font(None, 96)
-        self.score_p1 = 0
-        self.score_p2 = 0
         # sound crap
         self.sound_jump = pygame.mixer.Sound(os.path.join('assets', 'jump.wav'))
         self.sound_punch = pygame.mixer.Sound(os.path.join('assets', 'punch.wav'))
@@ -43,62 +43,43 @@ class Game:
         pygame.mixer.music.load(os.path.join('assets', 'brainblast.wav'))
         pygame.mixer.music.play(-1)
 
-    def create_players(self):
-        self.sound_restart.play()
-        self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
-        self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
-        self.dummy = Ai('idea_yellow.png', 250, 100, 64, 64)
-        self.ideas = []
-        self.dead_idea = []
-        self.ideas.append(self.player)
-        self.ideas.append(self.player2)
-        self.ideas.append(self.dummy)
-        self.num_ideas = len(self.ideas)
-
     def run(self):
-        self.menu()
-        while True:
-            dt = self.clock.tick(self.fps) / self.fps_const
-            # check events
-            self.events(dt)
-            # draw and update
-            self.level.draw(self.display)
-            self.level.animate(dt)
-            self.collisions()
-            self.draw_arrows()
-            self.dummy.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
-            for idea in self.ideas:
-                idea.update(dt, self.level)
-                idea.draw(self.display)
-                if idea.rect.x < -200 or idea.rect.x > 1000 or idea.rect.y > 1000:
-                    if not idea.dead:
-                        idea.dead = True
-                        self.dead_idea.append(idea)
-                        if idea == self.player:
-                            self.score_p2 += 1
-                        elif idea == self.player2:
-                            self.score_p1 += 1
-            self.draw_score()
-            # reset game when one player left
-            if len(self.dead_idea) >= self.num_ideas - 1:
-                self.create_players()
-            # update the damn screen
-            pygame.display.update()
-
-    def menu(self):
-        menu_image = pygame.image.load(os.path.join('assets', 'menu.png'))
-        while True:
-            self.display.blit(menu_image, (0,0))
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        sys.exit()
-                        pygame.quit()
-                    if event.key == pygame.K_SPACE:
-                        self.create_players()
-                        return
-            pygame.display.update()
-
+        running = True
+        menu = Menu()
+        while running:
+            # MENU
+            self.gameover = menu.run(self.display) 
+            # create players and reset scores
+            self.create_players()
+            self.reset_scores()
+            # GAME
+            while not self.gameover:
+                dt = self.clock.tick(self.fps) / self.fps_const
+                # check events
+                self.events(dt)
+                # draw and update
+                self.level.draw(self.display)
+                self.level.animate(dt)
+                self.collisions()
+                self.draw_arrows()
+                self.dummy.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
+                for idea in self.ideas:
+                    idea.update(dt, self.level)
+                    idea.draw(self.display)
+                    if idea.rect.x < -200 or idea.rect.x > 1000 or idea.rect.y > 1000:
+                        if not idea.dead:
+                            idea.dead = True
+                            self.dead_idea.append(idea)
+                            if idea == self.player:
+                                self.score_p2 += 1
+                            elif idea == self.player2:
+                                self.score_p1 += 1
+                self.draw_score()
+                # reset game when one player left
+                if len(self.dead_idea) >= self.num_ideas - 1:
+                    self.create_players()
+                # update the damn screen
+                pygame.display.update()
 
     def events(self, dt):
         keys = pygame.key.get_pressed()
@@ -129,11 +110,29 @@ class Game:
                     self.player.punch(self.sound_punch)
                 if event.key == pygame.K_LSHIFT:
                     self.player2.punch(self.sound_punch)
+                if event.key == pygame.K_q:
+                    self.gameover = True
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_DOWN:
                     self.player.phasing = False
                 if event.key == pygame.K_s:
                     self.player2.phasing = False
+
+    def create_players(self):
+        self.sound_restart.play()
+        self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
+        self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
+        self.dummy = Ai('idea_yellow.png', 250, 100, 64, 64)
+        self.ideas = []
+        self.dead_idea = []
+        self.ideas.append(self.player)
+        self.ideas.append(self.player2)
+        self.ideas.append(self.dummy)
+        self.num_ideas = len(self.ideas)
+
+    def reset_scores(self):
+        self.score_p1 = 0
+        self.score_p2 = 0
 
     def draw_score(self):
         self.display.blit(self.font.render(str(self.score_p1), 1, (252, 252, 97)), (310, 500))
