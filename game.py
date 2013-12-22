@@ -177,7 +177,7 @@ class Game:
                     i2.xv = (i2.mass / 10.0) * i1.facing * i2.damage * abs(i1.xv) / 2
                     i2.yv = - (i2.mass / 10.0) * i2.damage * 5
                     ## make you move back after you punch
-                    i1.xv = (i1.mass / 10.0) * (-i1.facing) * abs(i1.xv) / 2
+                    #i1.xv = (i1.mass / 10.0) * (-i1.facing) * abs(i1.xv) / 2
                     i2.damage += .15
             if i2.fist_rect.colliderect(i1.rect):
                 if i2.punching:
@@ -185,7 +185,7 @@ class Game:
                     i1.xv = (i1.mass / 10.0) * i2.facing * i1.damage * abs(i1.xv) / 2
                     i1.yv = - (i1.mass / 10.0) * i1.damage * 5
                     ## make you move back after you punch
-                    i2.xv = (i2.mass / 10.0) * (-i2.facing) * abs(i2.xv) / 2
+                    #i2.xv = (i2.mass / 10.0) * (-i2.facing) * abs(i2.xv) / 2
                     i1.damage += .15
 
     def draw_arrows(self):
