@@ -22,13 +22,6 @@ class Game:
         self.fps_const = fps_const
         self.gameover = True
         # create level
-        self.level = Level('bg0.png')
-        self.level.add_platform(Wall(200, 415, 460, 200))
-        self.level.add_platform(Wall(320, 295, 230, 10))
-        self.level.add_platform(Wall(105, 182, 260, 10))
-        self.level.add_platform(Wall(505, 185, 215, 10))
-        self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
-        self.level.add_animation('bg2.png', 1, 'horizontal', 5.0)
         # setup font for scores
         self.font = pygame.font.Font(None, 96)
         # sound crap
@@ -49,9 +42,9 @@ class Game:
         while running:
             # MENU
             self.gameover = menu.run(self.display) 
-            # create players and reset scores
-            self.create_players()
-            self.reset_scores()
+            # get selected level, #ai, and player chars
+            chosen = menu.chosen
+            self.setup_match(chosen)
             # GAME
             while not self.gameover:
                 dt = self.clock.tick(self.fps) / self.fps_const
@@ -62,7 +55,8 @@ class Game:
                 self.level.animate(dt)
                 self.collisions()
                 self.draw_arrows()
-                self.dummy.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
+                for ai in self.ai:
+                    ai.choice(dt, self.ideas, self.sound_jump, self.sound_punch)
                 for idea in self.ideas:
                     idea.update(dt, self.level)
                     idea.draw(self.display)
@@ -72,25 +66,25 @@ class Game:
                             self.dead_idea.append(idea)
                             if idea == self.player:
                                 self.score_p2 += 1
-                            elif idea == self.player2:
+                            elif self.player2 != None and idea == self.player2:
                                 self.score_p1 += 1
                 self.draw_score()
                 # reset game when one player left
-                if len(self.dead_idea) >= self.num_ideas - 1:
-                    self.create_players()
+                self.handle_deaths(menu.chosen)
                 # update the damn screen
                 pygame.display.update()
 
     def events(self, dt):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_d]:
-            self.player2.move(dt, 'right')
-        if keys[pygame.K_a]:
-            self.player2.move(dt, 'left')
-        if keys[pygame.K_w]:
-            self.player2.move(dt, 'up', self.sound_jump)
-        if keys[pygame.K_s]:
-            self.player2.move(dt, 'down')
+        if self.player2:
+            if keys[pygame.K_d]:
+                self.player2.move(dt, 'right')
+            if keys[pygame.K_a]:
+                self.player2.move(dt, 'left')
+            if keys[pygame.K_w]:
+                self.player2.move(dt, 'up', self.sound_jump)
+            if keys[pygame.K_s]:
+                self.player2.move(dt, 'down')
 
         if keys[pygame.K_RIGHT]:
             self.player.move(dt, 'right')
@@ -118,17 +112,58 @@ class Game:
                 if event.key == pygame.K_s:
                     self.player2.phasing = False
 
-    def create_players(self):
+    def setup_match(self, chosen):
+        print(chosen)
+        self.reset_scores()
+        # setup level and game mode
+        self.mode = chosen['mode']
+        level = chosen['level']
+        self.create_level(level)
+        # setup players and ai
+        if chosen['players']['p2'] != None:
+            players = 2
+        else:
+            players = 1
+        ai = chosen['ai']
+        self.create_players(players, ai)
+
+    def create_players(self, players, ai):
         self.sound_restart.play()
-        self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
-        self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
-        self.dummy = Ai('idea_yellow.png', 250, 100, 64, 64)
         self.ideas = []
+        self.ai = []
         self.dead_idea = []
+        self.player = Idea('idea_yellow.png', 300, 300, 64, 64)
         self.ideas.append(self.player)
-        self.ideas.append(self.player2)
-        self.ideas.append(self.dummy)
+        if players == 2:
+            self.player2 = Idea('idea_green.png', 450, 300, 64, 64)
+            self.ideas.append(self.player2)
+        else:
+            self.player2 = None
+        for i in range(ai):
+            new_ai = Ai('idea_yellow.png', 250, 100, 64, 64)
+            self.ideas.append(new_ai)
+            self.ai.append(new_ai)
         self.num_ideas = len(self.ideas)
+
+    def create_level(self, level):
+        if level == 'brain':
+            self.level = Level('bg0.png')
+            self.level.add_platform(Wall(200, 415, 460, 200))
+            self.level.add_platform(Wall(320, 295, 230, 10))
+            self.level.add_platform(Wall(105, 182, 260, 10))
+            self.level.add_platform(Wall(505, 185, 215, 10))
+            self.level.add_animation('bg1.png', 0, 'vertical', 3.0)
+            self.level.add_animation('bg2.png', 1, 'horizontal', 5.0)
+
+    def handle_deaths(self, chosen):
+        if chosen['mode'] == 'rounds':
+            if len(self.dead_idea) >= self.num_ideas - 1:
+                if chosen['players']['p2'] != None:
+                    players = 2
+                else:
+                    players = 1
+                ai = chosen['ai']
+                self.create_players(players, ai)
 
     def reset_scores(self):
         self.score_p1 = 0
